@@ -123,3 +123,37 @@ def queue_status(request, token_id):
     }
     return render(request, 'queue_status.html', context)
 
+@login_required
+def toggle_queue(request, queue_id):
+    if not request.user.is_owner:
+        return redirect('dashboard')
+    
+    queue = get_object_or_404(Queue, id=queue_id)
+    if not request.user.is_superuser and queue.created_by != request.user:
+        return redirect('dashboard')
+        
+    if request.method == 'POST':
+        queue.is_active = not queue.is_active
+        queue.save()
+        
+    return redirect('manage_queue', queue_id=queue.id)
+
+@login_required
+def verify_token(request, token_id):
+    if not request.user.is_owner:
+        return redirect('dashboard')
+        
+    token = get_object_or_404(Token, id=token_id)
+    if not request.user.is_superuser and token.queue.created_by != request.user:
+        return redirect('dashboard')
+        
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'mark_present':
+            token.status = 'COMPLETED'
+            token.save()
+            return redirect('manage_queue', queue_id=token.queue.id)
+            
+    return render(request, 'verify_token.html', {'token': token})
+
+
