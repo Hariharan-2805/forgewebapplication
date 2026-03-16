@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-sm font-medium mb-6">
+        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+        Say goodbye to physical lines
+    </div>
+    
+    <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6 max-w-3xl">
+        Queue smarter, not harder with <span class="text-indigo-600">SmartQueue</span>
+    </h1>
+    
+    <p class="text-xl text-gray-500 mb-10 max-w-2xl">
+        Join a virtual line from anywhere. Track your live status. Get notified when it's your turn. Spend your time where it matters.
+    </p>
+    
+    <div class="flex sm:flex-row flex-col gap-4">
+        {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="px-8 py-3.5 border border-transparent text-lg font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm smooth-hover hover:shadow-md">
+                Go to Dashboard
+            </a>
+            {% if not user.is_owner %}
+            <a href="{% url 'join_queue' %}" class="px-8 py-3.5 border border-gray-300 text-lg font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 shadow-sm smooth-hover hover:shadow-md">
+                Join a Queue
+            </a>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'signup' %}" class="px-8 py-3.5 border border-transparent text-lg font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm smooth-hover hover:shadow-md">
+                Get Started
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Feature highlights -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 max-w-5xl">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-left">
+            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4 text-xl">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">QR Check-in</h3>
+            <p class="text-gray-500 leading-relaxed">Instantly generate a QR ticket to verify your turn when you arrive.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-left">
+            <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 mb-4 text-xl">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Live Tracking</h3>
+            <p class="text-gray-500 leading-relaxed">Watch the queue move in real-time and know your exact estimated wait time.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-left">
+            <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 mb-4 text-xl">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Smart Reminders</h3>
+            <p class="text-gray-500 leading-relaxed">Receive instant notifications so you never miss your turn.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900">
+            {% if is_owner %}Admin Dashboard{% else %}My Dashboard{% endif %}
+        </h1>
+        <p class="text-gray-500 mt-1">
+            {% if is_owner %}Manage your facility queues and view analytics.{% else %}Manage your active queue tokens.{% endif %}
+        </p>
+    </div>
+    {% if not is_owner %}
+    <a href="{% url 'join_queue' %}" class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 shadow-sm smooth-hover flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Join New Queue
+    </a>
+    {% else %}
+    <a href="{% url 'create_queue' %}" class="px-5 py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 shadow-sm smooth-hover flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Create Queue
+    </a>
+    {% endif %}
+</div>
+
+{% if is_owner %}
+    {% if queues %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for queue in queues %}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md smooth-hover flex flex-col">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-wider {% if queue.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                        {% if queue.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ queue.name }}</h3>
+                <p class="text-sm text-gray-500 mb-6 flex-grow">{{ queue.description|truncatewords:60 }}</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-gray-50 p-3 rounded-lg text-center">
+                        <span class="block text-2xl font-bold text-indigo-600">{{ queue.tokens.count }}</span>
+                        <span class="text-xs text-gray-500 uppercase font-medium">Total Tokens</span>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg text-center">
+                        <span class="block text-2xl font-bold text-emerald-600">{{ queue.avg_wait_time_per_person }}m</span>
+                        <span class="text-xs text-gray-500 uppercase font-medium">Avg Wait</span>
+                    </div>
+                </div>
+                <a href="{% url 'manage_queue' queue.id %}" class="w-full text-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 shadow-sm smooth-hover">
+                    Manage Queue
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+            <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-blue-400 mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">No queues managed</h3>
+            <p class="text-gray-500 max-w-sm mx-auto mb-6">You haven't created any queues yet. Create a queue to start accepting tokens.</p>
+        </div>
+    {% endif %}
+{% else %}
+    {% if tokens %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for token in tokens %}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md smooth-hover flex flex-col">
+                <div class="p-6 flex-grow">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-wider
+                            {% if token.status == 'WAITING' %}bg-orange-100 text-orange-800
+                            {% elif token.status == 'SERVING' %}bg-green-100 text-green-800
+                            {% elif token.status == 'COMPLETED' %}bg-gray-100 text-gray-800
+                            {% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ token.get_status_display }}
+                        </div>
+                        <span class="text-sm font-medium text-gray-400">#{{ token.number }}</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-gray-900 mb-1">{{ token.queue.name }}</h3>
+                    <p class="text-sm text-gray-500 mb-6 flex items-center gap-2">
+                        <i class="fa-regular fa-clock"></i> Joined {{ token.created_at|date:"M d, g:i a" }}
+                    </p>
+                    
+                    {% if token.status == 'WAITING' %}
+                    <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700">
+                        Your token ID: <span class="font-mono text-xs font-bold">{{ token.id|truncatechars:12 }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
+                    <a href="{% url 'queue_status' token.id %}" class="text-indigo-600 font-medium text-sm hover:text-indigo-800 flex items-center justify-between">
+                        View Live Status <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-ticket"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">No active tokens</h3>
+            <p class="text-gray-500 max-w-sm mx-auto mb-6">You are not currently waiting in any queues. Join a queue to get a token and start tracking your wait time.</p>
+            <a href="{% url 'join_queue' %}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 shadow-sm smooth-hover">
+                Join a Queue
+            </a>
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

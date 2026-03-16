@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="mb-6 flex justify-between items-end">
+        <a href="{% url 'dashboard' %}" class="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-2">
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <div class="flex items-center gap-2 text-sm text-emerald-600 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Live Updates Active
+        </div>
+    </div>
+
+    <!-- Main Token Card -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden text-center mb-8">
+        <div class="bg-indigo-600 px-6 py-8 text-white relative">
+            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
+                {{ token.get_status_display }}
+            </div>
+            <h2 class="text-indigo-100 text-lg font-medium mb-1">{{ token.queue.name }}</h2>
+            <p class="text-sm text-indigo-200">Your Virtual Token Number</p>
+            <div class="text-7xl font-extrabold mt-4 mb-2 tracking-tighter shadow-sm">
+                #{{ token.number }}
+            </div>
+        </div>
+        
+        <div class="p-8">
+            <div class="grid grid-cols-2 gap-8 divide-x divide-gray-100">
+                <div class="px-4">
+                    <p class="text-gray-500 text-sm font-medium uppercase tracking-wider mb-2">People Ahead</p>
+                    <div class="text-4xl font-bold text-gray-900">{{ ahead }}</div>
+                </div>
+                <div class="px-4">
+                    <p class="text-gray-500 text-sm font-medium uppercase tracking-wider mb-2">Est. Wait</p>
+                    <div class="text-4xl font-bold text-gray-900 flex items-baseline justify-center gap-1">
+                        {{ est_wait }} <span class="text-lg text-gray-500 font-normal">min</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mt-10">
+                <div class="flex justify-between text-xs text-gray-500 font-semibold mb-2 px-1">
+                    <span>Joined</span>
+                    <span>Your Turn</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-3">
+                    {% if ahead == 0 and token.status == 'WAITING' %}
+                        <div class="bg-indigo-600 h-3 rounded-full transition-all duration-1000 w-[90%]"></div>
+                    {% elif token.status == 'SERVING' or token.status == 'COMPLETED' %}
+                        <div class="bg-green-500 h-3 rounded-full transition-all duration-1000 w-full"></div>
+                    {% else %}
+                        <!-- Approximate visual logic, just for UI -->
+                        <div class="bg-indigo-600 h-3 rounded-full transition-all duration-1000 w-[40%]"></div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Section -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 flex flex-col md:flex-row items-center gap-8">
+        <div class="flex-shrink-0 w-32 h-32 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden">
+            {% if token.qr_code %}
+                <img src="{{ token.qr_code.url }}" alt="QR Code" class="w-full h-full object-cover">
+            {% else %}
+                <i class="fa-solid fa-qrcode text-4xl text-gray-300"></i>
+            {% endif %}
+        </div>
+        <div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Scan & Check-in</h3>
+            <p class="text-gray-500 mb-4">When you arrive, show this QR code at the desk or scan it on the kiosk to verify your presence.</p>
+            <div class="inline-flex bg-gray-50 rounded-lg px-4 py-2 border border-gray-200">
+                <span class="text-xs text-gray-500 uppercase tracking-widest font-semibold mr-3 self-center">ID</span>
+                <span class="font-mono text-sm font-bold text-gray-800">{{ token.id }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple auto-refresh snippet for simulation
+    setTimeout(function() {
+        if('{{ token.status }}' === 'WAITING') {
+            window.location.reload();
+        }
+    }, 15000); // 15 seconds
+</script>
+{% endblock %}
