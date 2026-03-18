@@ -10,7 +10,7 @@ class Command(BaseCommand):
         User = get_user_model()
         username = os.environ.get("DJANGO_SUPERUSER_USERNAME") or "admin"
         email = os.environ.get("DJANGO_SUPERUSER_EMAIL") or "admin@example.com"
-        password = os.environ.get("DJANGO_SUPERUSER_PASSWORD") or "Admin123!"
+        password = os.environ.get("DJANGO_SUPERUSER_PASSWORD") or "admin123"
 
         try:
             user, created = User.objects.get_or_create(username=username, defaults={"email": email})
